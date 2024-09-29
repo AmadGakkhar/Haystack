@@ -14,6 +14,18 @@ from haystack_integrations.components.embedders.cohere import CohereDocumentEmbe
 class DataIngestion:
     def __init__(self):
         
+        """
+        Initialize the DataIngestion object.
+
+        This method initializes the following instance variables for the DataIngestion object:
+
+        - self.cleaner: A DocumentCleaner object to clean the text.
+        - self.splitter: A DocumentSplitter object to split the text into documents.
+        - self.converter: A PyPDFToDocument converter to convert the PDF into a Haystack document.
+        - self.embedder: A CohereDocumentEmbedder to generate embeddings for the documents.
+        - self.document_store: An InMemoryDocumentStore to store the documents.
+        - self.writer: A DocumentWriter to write the documents to the document store.
+        """
         self.cleaner = DocumentCleaner(
             remove_empty_lines=True,
             remove_extra_whitespaces=True,
@@ -33,6 +45,14 @@ class DataIngestion:
         
     def get_indexing_pipeline(self):
       
+        """
+        Create and return an indexing pipeline.
+
+        This method creates an indexing pipeline by instantiating a Pipeline object, adding the components and connecting them.
+
+        Returns:
+            Pipeline: The created pipeline.
+        """
         self.pipeline = Pipeline()
         self.pipeline.add_component("converter", self.converter)
         self.pipeline.add_component("cleaner", self.cleaner)
@@ -48,9 +68,23 @@ class DataIngestion:
         return self.pipeline
     
     def save_ds(self):
+        """
+        Save the document store to disk.
+
+        This method saves the document store to disk, which stores the documents that have been processed.
+
+        The document store is saved to the "./artifacts/document_store" directory.
+        """
         self.document_store.save_to_disk("./artifacts/document_store")
         
     def run(self):
+        """
+        Run the indexing pipeline.
+
+        This method runs the indexing pipeline, which processes the documents in the document store and saves the embeddings to disk.
+
+        The pipeline is run with a single source, which is the "sample_pdf.pdf" file in the "./data" directory.
+        """
         pipeline = self.get_indexing_pipeline()
         pipeline.run(
             {
