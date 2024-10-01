@@ -7,13 +7,14 @@ from haystack.components.converters import PyPDFToDocument
 from haystack.components.preprocessors import DocumentCleaner, DocumentSplitter
 from haystack.components.writers import DocumentWriter
 from haystack_integrations.components.embedders.cohere import CohereDocumentEmbedder
-# components: classes that are used as building blocks for pipelines. 
+
+# components: classes that are used as building blocks for pipelines.
 # Examples include Converters, DocumentStores, Retrievers, Routers, and Readers.
 # nodes: objects that are used to build the pipeline. Can be either a Component or a Pipeline itself.
 
+
 class DataIngestion:
     def __init__(self):
-        
         """
         Initialize the DataIngestion object.
 
@@ -29,22 +30,17 @@ class DataIngestion:
         self.cleaner = DocumentCleaner(
             remove_empty_lines=True,
             remove_extra_whitespaces=True,
-            remove_repeated_substrings=True
+            remove_repeated_substrings=True,
         )
         self.splitter = DocumentSplitter(
-            split_by='word',
-            split_overlap=10,
-            split_length=200
+            split_by="word", split_overlap=10, split_length=200
         )
         self.converter = PyPDFToDocument()
         self.embedder = CohereDocumentEmbedder()
-        self.document_store = InMemoryDocumentStore()   
+        self.document_store = InMemoryDocumentStore()
         self.writer = DocumentWriter(self.document_store)
-   
 
-        
     def get_indexing_pipeline(self):
-      
         """
         Create and return an indexing pipeline.
 
@@ -56,7 +52,7 @@ class DataIngestion:
         self.pipeline = Pipeline()
         self.pipeline.add_component("converter", self.converter)
         self.pipeline.add_component("cleaner", self.cleaner)
-        self.pipeline.add_component("splitter", self.splitter)   
+        self.pipeline.add_component("splitter", self.splitter)
         self.pipeline.add_component("embedder", self.embedder)
         self.pipeline.add_component("writer", self.writer)
 
@@ -64,9 +60,9 @@ class DataIngestion:
         self.pipeline.connect("cleaner", "splitter")
         self.pipeline.connect("splitter", "embedder")
         self.pipeline.connect("embedder", "writer")
-        
+
         return self.pipeline
-    
+
     def save_ds(self):
         """
         Save the document store to disk.
@@ -76,7 +72,10 @@ class DataIngestion:
         The document store is saved to the "./artifacts/document_store" directory.
         """
         self.document_store.save_to_disk("./artifacts/document_store")
-        
+
+    def load_ds(self, path):
+        return InMemoryDocumentStore().load_from_disk(path)
+
     def run(self):
         """
         Run the indexing pipeline.
@@ -92,10 +91,11 @@ class DataIngestion:
             }
         )
         self.save_ds()
-    
-        
+
+
 if __name__ == "__main__":
     load_dotenv()
     ingestion = DataIngestion()
     ingestion.run()
-       
+    ingestion.load_ds("./artifacts/document_store")
+    print("Doc store load successful")

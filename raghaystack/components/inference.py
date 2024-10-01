@@ -6,16 +6,16 @@ from haystack.components.generators import OpenAIGenerator
 from haystack.utils.auth import Secret
 from haystack.document_stores.in_memory import InMemoryDocumentStore
 from raghaystack.prompts.simple_prompt import PROMPT
+from dotenv import load_dotenv
 
 
 class Inference:
     def __init__(self, doc_store_path: str):
         self.doc_store_path = doc_store_path
+        document_store = InMemoryDocumentStore().load_from_disk(doc_store_path)
         self.pipeline = Pipeline()
-        self.retriever = InMemoryEmbeddingRetriever(
-            document_store=InMemoryDocumentStore().load_from_disk(doc_store_path)
-        )
-        self.prompt_builder = PromptBuilder()
+        self.retriever = InMemoryEmbeddingRetriever(document_store=document_store)
+        self.prompt_builder = PromptBuilder(template=PROMPT)
         self.query_embedder = CohereTextEmbedder()
         self.llm = OpenAIGenerator(
             api_key=Secret.from_env_var("GROQ_API_KEY"),
@@ -45,8 +45,8 @@ class Inference:
         result = pipeline.run(
             {
                 "query_embedder": {"text": query},
-                "retriever": {"top_k": 1},
-                "prompt": {"query": query},
+                "retriever": {"top_k": 3},
+                "prompt_builder": {"query": query},
             }
         )
 
@@ -54,7 +54,9 @@ class Inference:
 
 
 if __name__ == "__main__":
+    load_dotenv()
+
     inference = Inference(
-        doc_store_path="/home/amadgakkhar/code/Haystack/data/sample_pdf.pdf"
+        doc_store_path="/home/amadgakkhar/code/Haystack/artifacts/document_store"
     )
     inference.run("Who is the author")

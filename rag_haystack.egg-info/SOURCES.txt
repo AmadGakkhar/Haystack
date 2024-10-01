@@ -1,0 +1,12 @@
+README.md
+setup.py
+rag-haystack/__init__.py
+rag-haystack/components/__init__.py
+rag-haystack/components/data_ingestion.py
+rag-haystack/components/inference.py
+rag-haystack/prompts/__init__.py
+rag-haystack/prompts/simple_prompt.py
+rag_haystack.egg-info/PKG-INFO
+rag_haystack.egg-info/SOURCES.txt
+rag_haystack.egg-info/dependency_links.txt
+rag_haystack.egg-info/top_level.txt
