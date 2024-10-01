@@ -8,6 +8,8 @@ from haystack.components.preprocessors import DocumentCleaner, DocumentSplitter
 from haystack.components.writers import DocumentWriter
 from haystack_integrations.components.embedders.cohere import CohereDocumentEmbedder
 from raghaystack.constants import DOCUMENT_STORE_PATH, DOCUMENT_STORE_NAME
+import json
+from raghaystack.utils import store_dict_as_json
 
 
 # components: classes that are used as building blocks for pipelines.
@@ -77,6 +79,7 @@ class DataIngestion:
             os.makedirs(DOCUMENT_STORE_PATH)
 
         self.document_store.save_to_disk(store_path)
+        return store_path
 
     def load_ds(self, path):
         return InMemoryDocumentStore().load_from_disk(path)
@@ -95,10 +98,39 @@ class DataIngestion:
                 "sources": [os.path.join("data", "sample_pdf.pdf")],
             }
         )
-        self.save_ds()
+        store_path = self.save_ds()
+        return {
+            "store_path": store_path,
+            "document_store": self.document_store.to_dict(),
+            "converter": self.converter.to_dict(),
+            "embedder": self.embedder.to_dict(),
+            "cleaner": {
+                key: value
+                for key, value in self.cleaner.__dict__.items()
+                if key
+                not in [
+                    "__haystack_input__",
+                    "__haystack_output__",
+                    "__haystack_added_to_pipeline__",
+                ]
+            },
+            "splitter": {
+                key: value
+                for key, value in self.splitter.__dict__.items()
+                if key
+                not in [
+                    "__haystack_input__",
+                    "__haystack_output__",
+                    "__haystack_added_to_pipeline__",
+                ]
+            },
+        }
 
 
 if __name__ == "__main__":
     load_dotenv()
     ingestion = DataIngestion()
-    ingestion.run()
+    state_dict = ingestion.run()
+    store_dict_as_json(
+        state_dict, "/home/amadgakkhar/code/Haystack/artifacts/index_state.json"
+    )

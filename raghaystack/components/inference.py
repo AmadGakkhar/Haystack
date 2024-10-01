@@ -7,8 +7,13 @@ from haystack.utils.auth import Secret
 from haystack.document_stores.in_memory import InMemoryDocumentStore
 from raghaystack.prompts.simple_prompt import PROMPT
 from dotenv import load_dotenv
-from raghaystack.constants import DOCUMENT_STORE_PATH, DOCUMENT_STORE_NAME
+from raghaystack.constants import (
+    DOCUMENT_STORE_PATH,
+    DOCUMENT_STORE_NAME,
+    INDEX_STATE_JSON_PATH,
+)
 import os
+from raghaystack.utils import load_json_as_dict
 
 
 class Inference:
@@ -57,11 +62,10 @@ class Inference:
 
 if __name__ == "__main__":
     load_dotenv()
+    index_state = {}
+    index_state = load_json_as_dict(INDEX_STATE_JSON_PATH)
 
     inference = Inference(
-        doc_store_path=os.path.join(
-            "/home/amadgakkhar/code/Haystack/artifacts/10_01_2024_16_39_42",
-            DOCUMENT_STORE_NAME,
-        )
+        doc_store_path=index_state["store_path"],
     )
     inference.run("What is this project about?")
