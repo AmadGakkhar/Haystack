@@ -7,6 +7,8 @@ from haystack.utils.auth import Secret
 from haystack.document_stores.in_memory import InMemoryDocumentStore
 from raghaystack.prompts.simple_prompt import PROMPT
 from dotenv import load_dotenv
+from raghaystack.constants import DOCUMENT_STORE_PATH, DOCUMENT_STORE_NAME
+import os
 
 
 class Inference:
@@ -57,6 +59,9 @@ if __name__ == "__main__":
     load_dotenv()
 
     inference = Inference(
-        doc_store_path="/home/amadgakkhar/code/Haystack/artifacts/document_store"
+        doc_store_path=os.path.join(
+            "/home/amadgakkhar/code/Haystack/artifacts/10_01_2024_16_39_42",
+            DOCUMENT_STORE_NAME,
+        )
     )
-    inference.run("Who is the author")
+    inference.run("What is this project about?")

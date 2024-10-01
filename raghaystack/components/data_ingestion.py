@@ -7,6 +7,8 @@ from haystack.components.converters import PyPDFToDocument
 from haystack.components.preprocessors import DocumentCleaner, DocumentSplitter
 from haystack.components.writers import DocumentWriter
 from haystack_integrations.components.embedders.cohere import CohereDocumentEmbedder
+from raghaystack.constants import DOCUMENT_STORE_PATH, DOCUMENT_STORE_NAME
+
 
 # components: classes that are used as building blocks for pipelines.
 # Examples include Converters, DocumentStores, Retrievers, Routers, and Readers.
@@ -69,9 +71,12 @@ class DataIngestion:
 
         This method saves the document store to disk, which stores the documents that have been processed.
 
-        The document store is saved to the "./artifacts/document_store" directory.
         """
-        self.document_store.save_to_disk("./artifacts/document_store")
+        store_path = os.path.join(DOCUMENT_STORE_PATH, DOCUMENT_STORE_NAME)
+        if not os.path.exists(DOCUMENT_STORE_PATH):
+            os.makedirs(DOCUMENT_STORE_PATH)
+
+        self.document_store.save_to_disk(store_path)
 
     def load_ds(self, path):
         return InMemoryDocumentStore().load_from_disk(path)
@@ -97,5 +102,3 @@ if __name__ == "__main__":
     load_dotenv()
     ingestion = DataIngestion()
     ingestion.run()
-    ingestion.load_ds("./artifacts/document_store")
-    print("Doc store load successful")
